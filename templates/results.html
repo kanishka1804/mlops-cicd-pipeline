@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Prediction Result · VinoSense</title>
+    <link rel="icon" type="image/x-icon" href="static/assets/favicon.ico" />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --crimson:    #7c1d2e;
+            --crimson-dk: #4a0e1a;
+            --crimson-lt: #a8294a;
+            --amber:      #c8973a;
+            --amber-lt:   #e8c278;
+            --ivory:      #f8f4ee;
+            --ivory-dk:   #e8dfd2;
+            --charcoal:   #1c1410;
+            --muted:      #8a7060;
+            --green:      #2d6a4f;
+            --green-lt:   #52b788;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { height: 100%; }
+
+        body {
+            font-family: 'Jost', sans-serif;
+            background: var(--ivory);
+            color: var(--charcoal);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── NAV ── */
+        #mainNav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.1rem 3rem;
+            background: rgba(248,244,238,0.96);
+            border-bottom: 1px solid rgba(124,29,46,0.1);
+            position: relative;
+            z-index: 10;
+        }
+
+        .nav-brand {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: var(--crimson);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+        }
+
+        .nav-dot {
+            width: 9px; height: 9px;
+            border-radius: 50%;
+            background: var(--amber);
+        }
+
+        .nav-back {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.78rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.15s;
+        }
+
+        .nav-back:hover { color: var(--crimson); }
+
+        .nav-back svg { width: 14px; height: 14px; }
+
+        /* ── MAIN ── */
+        main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* background pattern */
+        main::before {
+            content: '';
+            position: absolute; inset: 0;
+            background-image:
+                linear-gradient(rgba(124,29,46,0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(124,29,46,0.02) 1px, transparent 1px);
+            background-size: 44px 44px;
+            pointer-events: none;
+        }
+
+        /* big decorative circle */
+        main::after {
+            content: '';
+            position: absolute;
+            top: -200px; right: -200px;
+            width: 700px; height: 700px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(124,29,46,0.05) 0%, transparent 65%);
+            pointer-events: none;
+        }
+
+        /* ── RESULT CARD ── */
+        .result-card {
+            background: #fff;
+            border-radius: 24px;
+            padding: 3.5rem 4rem;
+            width: 100%;
+            max-width: 680px;
+            box-shadow:
+                0 2px 8px rgba(124,29,46,0.05),
+                0 16px 48px rgba(124,29,46,0.1),
+                0 48px 96px rgba(124,29,46,0.05);
+            border: 1px solid rgba(124,29,46,0.07);
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            animation: rise 0.7s cubic-bezier(0.16,1,0.3,1) both;
+        }
+
+        @keyframes rise {
+            from { opacity: 0; transform: translateY(28px) scale(0.98); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* top amber bar */
+        .result-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 10%; right: 10%;
+            height: 2px;
+            background: linear-gradient(to right, transparent, var(--amber), transparent);
+            border-radius: 100px;
+        }
+
+        /* ── ICON RING ── */
+        .icon-ring {
+            width: 90px; height: 90px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--crimson-dk), var(--crimson-lt));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 2rem;
+            box-shadow: 0 8px 30px rgba(124,29,46,0.25);
+            position: relative;
+            animation: popIn 0.5s 0.3s cubic-bezier(0.16,1,0.3,1) both;
+        }
+
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.5); }
+            to   { opacity: 1; transform: scale(1); }
+        }
+
+        .icon-ring::after {
+            content: '';
+            position: absolute;
+            inset: -6px;
+            border-radius: 50%;
+            border: 1px solid rgba(124,29,46,0.12);
+        }
+
+        .icon-ring svg {
+            width: 38px; height: 38px;
+            color: #fff;
+        }
+
+        /* ── EYEBROW ── */
+        .result-eyebrow {
+            font-size: 0.7rem;
+            letter-spacing: 0.24em;
+            text-transform: uppercase;
+            color: var(--amber);
+            font-weight: 500;
+            margin-bottom: 0.9rem;
+        }
+
+        /* ── LABEL ── */
+        .result-label {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.4rem;
+            font-weight: 400;
+            color: var(--muted);
+            margin-bottom: 0.5rem;
+            font-style: italic;
+        }
+
+        /* ── PREDICTION VALUE ── */
+        .prediction-value {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(4rem, 10vw, 7rem);
+            font-weight: 300;
+            color: var(--crimson-dk);
+            line-height: 1;
+            margin-bottom: 0.4rem;
+            animation: countUp 0.6s 0.4s cubic-bezier(0.16,1,0.3,1) both;
+        }
+
+        @keyframes countUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .prediction-unit {
+            font-family: 'Jost', sans-serif;
+            font-size: 1rem;
+            color: var(--muted);
+            font-weight: 300;
+            letter-spacing: 0.08em;
+            margin-bottom: 2rem;
+        }
+
+        /* ── QUALITY BAR ── */
+        .quality-bar-wrap {
+            margin: 0 auto 2.5rem;
+            max-width: 420px;
+        }
+
+        .quality-bar-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.68rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .quality-bar-track {
+            height: 6px;
+            background: var(--ivory-dk);
+            border-radius: 100px;
+            overflow: visible;
+            position: relative;
+        }
+
+        .quality-bar-fill {
+            height: 100%;
+            border-radius: 100px;
+            background: linear-gradient(to right, var(--crimson-lt), var(--amber));
+            /* width set via JS based on prediction value */
+            width: var(--bar-width, 60%);
+            transition: width 1s cubic-bezier(0.16,1,0.3,1);
+            box-shadow: 0 0 8px rgba(200,151,58,0.4);
+        }
+
+        /* ── VERDICT BADGE ── */
+        .verdict {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.5rem 1.3rem;
+            border-radius: 100px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            letter-spacing: 0.06em;
+            margin-bottom: 2.5rem;
+        }
+
+        .verdict.good {
+            background: rgba(45,106,79,0.08);
+            color: var(--green);
+            border: 1px solid rgba(45,106,79,0.2);
+        }
+
+        .verdict.average {
+            background: rgba(200,151,58,0.1);
+            color: #8a6420;
+            border: 1px solid rgba(200,151,58,0.3);
+        }
+
+        .verdict.poor {
+            background: rgba(124,29,46,0.08);
+            color: var(--crimson);
+            border: 1px solid rgba(124,29,46,0.2);
+        }
+
+        .verdict-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        /* ── DIVIDER ── */
+        .card-divider {
+            height: 1px;
+            background: linear-gradient(to right, transparent, var(--ivory-dk), transparent);
+            margin: 0 0 2rem;
+        }
+
+        /* ── STATS ROW ── */
+        .result-stats {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .r-stat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .r-stat-val {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.5rem;
+            font-weight: 400;
+            color: var(--crimson-dk);
+        }
+
+        .r-stat-lbl {
+            font-size: 0.68rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        /* ── BUTTONS ── */
+        .btn-row {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .btn-primary-wine {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.85rem 2rem;
+            background: linear-gradient(135deg, var(--crimson-dk), var(--crimson-lt));
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Jost', sans-serif;
+            font-size: 0.84rem;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            cursor: pointer;
+            text-decoration: none;
+            box-shadow: 0 4px 16px rgba(124,29,46,0.28);
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+
+        .btn-primary-wine:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(124,29,46,0.38);
+            color: #fff;
+        }
+
+        .btn-outline-wine {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.85rem 2rem;
+            background: transparent;
+            color: var(--crimson);
+            border: 1.5px solid rgba(124,29,46,0.25);
+            border-radius: 10px;
+            font-family: 'Jost', sans-serif;
+            font-size: 0.84rem;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            cursor: pointer;
+            text-decoration: none;
+            transition: border-color 0.15s, background 0.15s;
+        }
+
+        .btn-outline-wine:hover {
+            border-color: var(--crimson);
+            background: rgba(124,29,46,0.04);
+            color: var(--crimson);
+        }
+
+        .btn-primary-wine svg,
+        .btn-outline-wine svg { width: 15px; height: 15px; }
+
+        /* ── BANNER ── */
+        .banner {
+            background: var(--crimson-dk);
+            padding: 0.9rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1.8rem;
+            flex-wrap: wrap;
+        }
+
+        .b-item {
+            font-size: 0.7rem;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.38);
+        }
+
+        .b-item strong { color: var(--amber-lt); font-weight: 500; }
+        .b-sep { color: rgba(200,151,58,0.3); }
+
+        /* ── FOOTER ── */
+        footer {
+            background: var(--charcoal);
+            padding: 1.5rem 2rem;
+            text-align: center;
+        }
+
+        footer p {
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.26);
+            margin: 0;
+            letter-spacing: 0.04em;
+        }
+
+        footer strong { color: rgba(200,151,58,0.6); font-weight: 400; }
+
+        @media (max-width: 600px) {
+            .result-card { padding: 2.5rem 1.8rem; }
+            .btn-row { flex-direction: column; }
+            .result-stats { gap: 1.5rem; }
+            #mainNav { padding: 0.9rem 1.3rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAV -->
+    <nav id="mainNav">
+        <a class="nav-brand" href="/">
+            <span class="nav-dot"></span>
+            Vino<span style="font-style:italic;color:var(--amber)">Sense</span>
+        </a>
+        <a class="nav-back" href="/">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 18 9 12 15 6"/>
+            </svg>
+            New Prediction
+        </a>
+    </nav>
+
+    <!-- MAIN -->
+    <main>
+        <div class="result-card" id="resultCard">
+
+            <!-- Icon -->
+            <div class="icon-ring">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M8 3c0 0 1 4 1 7s-2 5-2 5h10s-2-2-2-5 1-7 1-7H8z"/>
+                    <path d="M10 21h4M12 15v6"/>
+                </svg>
+            </div>
+
+            <!-- Eyebrow -->
+            <p class="result-eyebrow">— Prediction Result</p>
+
+            <!-- Label -->
+            <p class="result-label">Wine Quality Score</p>
+
+            <!-- Big number -->
+            <div class="prediction-value" id="predValue">{{prediction}}</div>
+            <p class="prediction-unit">out of 10</p>
+
+            <!-- Quality bar -->
+            <div class="quality-bar-wrap">
+                <div class="quality-bar-labels">
+                    <span>Poor</span>
+                    <span>Average</span>
+                    <span>Excellent</span>
+                </div>
+                <div class="quality-bar-track">
+                    <div class="quality-bar-fill" id="qualityBar"></div>
+                </div>
+            </div>
+
+            <!-- Verdict badge -->
+            <div id="verdictBadge" class="verdict average">
+                <span class="verdict-dot"></span>
+                <span id="verdictText">Analyzing…</span>
+            </div>
+
+            <div class="card-divider"></div>
+
+            <!-- Stats -->
+            <div class="result-stats">
+                <div class="r-stat">
+                    <div class="r-stat-val">ML</div>
+                    <div class="r-stat-lbl">Model</div>
+                </div>
+                <div class="r-stat">
+                    <div class="r-stat-val" id="scoreDisplay">—</div>
+                    <div class="r-stat-lbl">Quality Score</div>
+                </div>
+                <div class="r-stat">
+                    <div class="r-stat-val">~0s</div>
+                    <div class="r-stat-lbl">Inference</div>
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="btn-row">
+                <a href="/" class="btn-primary-wine">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="15 18 9 12 15 6"/>
+                    </svg>
+                    Predict Again
+                </a>
+                <button onclick="window.print()" class="btn-outline-wine">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+                        <rect x="6" y="14" width="12" height="8"/>
+                    </svg>
+                    Save Result
+                </button>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- BANNER -->
+    <div class="banner">
+        <span class="b-item"><strong>scikit-learn</strong> · Machine Learning</span>
+        <span class="b-sep">✦</span>
+        <span class="b-item"><strong>MLflow</strong> · Experiment Tracking</span>
+        <span class="b-sep">✦</span>
+        <span class="b-item"><strong>Flask</strong> · REST API</span>
+    </div>
+
+    <footer>
+        <p>Wine Quality Prediction &nbsp;·&nbsp; Built with <strong>Python</strong>, <strong>MLflow</strong> &amp; <strong>Flask</strong></p>
+    </footer>
+
+    <script>
+        // Read prediction value from the rendered template
+        const raw = document.getElementById('predValue').textContent.trim();
+        const score = parseFloat(raw);
+
+        // Update quality bar width (scale 0–10 → 0–100%)
+        const pct = isNaN(score) ? 50 : Math.min(Math.max((score / 10) * 100, 4), 100);
+        document.getElementById('qualityBar').style.setProperty('--bar-width', pct + '%');
+        document.getElementById('qualityBar').style.width = pct + '%';
+
+        // Update score display
+        document.getElementById('scoreDisplay').textContent = isNaN(score) ? raw : score.toFixed(1);
+
+        // Verdict badge
+        const badge = document.getElementById('verdictBadge');
+        const text  = document.getElementById('verdictText');
+
+        if (!isNaN(score)) {
+            if (score >= 7) {
+                badge.className = 'verdict good';
+                text.textContent = 'Excellent Quality';
+            } else if (score >= 5) {
+                badge.className = 'verdict average';
+                text.textContent = 'Average Quality';
+            } else {
+                badge.className = 'verdict poor';
+                text.textContent = 'Below Average';
+            }
+        } else {
+            badge.className = 'verdict average';
+            text.textContent = raw;
+        }
+    </script>
+
+</body>
+</html>

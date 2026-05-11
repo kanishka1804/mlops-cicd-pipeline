@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Wine Quality Prediction</title>
+    <link rel="icon" type="image/x-icon" href="static/assets/favicon.ico" />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --crimson:    #7c1d2e;
+            --crimson-dk: #4a0e1a;
+            --crimson-lt: #a8294a;
+            --amber:      #c8973a;
+            --amber-lt:   #e8c278;
+            --ivory:      #f8f4ee;
+            --ivory-dk:   #e8dfd2;
+            --charcoal:   #1c1410;
+            --muted:      #8a7060;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { height: 100%; }
+
+        body {
+            font-family: 'Jost', sans-serif;
+            background: var(--ivory);
+            color: var(--charcoal);
+            overflow-x: hidden;
+        }
+
+        /* ── NAV ── */
+        #mainNav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.1rem 3rem;
+            background: rgba(248,244,238,0.94);
+            backdrop-filter: blur(18px);
+            border-bottom: 1px solid rgba(124,29,46,0.1);
+        }
+
+        .nav-brand {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: var(--crimson);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+        }
+
+        .nav-dot {
+            width: 9px; height: 9px;
+            border-radius: 50%;
+            background: var(--amber);
+        }
+
+        .nav-label {
+            font-size: 0.72rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--muted);
+            font-weight: 400;
+        }
+
+        /* ── MAIN LAYOUT ── */
+        .page {
+            display: grid;
+            grid-template-columns: 42% 58%;
+            min-height: 100vh;
+            padding-top: 64px; /* nav height */
+        }
+
+        /* ── LEFT PANEL ── */
+        .panel-left {
+            background: var(--crimson-dk);
+            position: sticky;
+            top: 64px;
+            height: calc(100vh - 64px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 4rem 4rem 3rem 5rem;
+            overflow: hidden;
+        }
+
+        .panel-left::before {
+            content: '';
+            position: absolute;
+            top: -180px; right: -180px;
+            width: 600px; height: 600px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(168,41,74,0.5) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .panel-left::after {
+            content: '';
+            position: absolute;
+            bottom: -100px; left: -80px;
+            width: 400px; height: 400px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(200,151,58,0.12) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .left-line {
+            position: absolute;
+            top: 22%; left: 0;
+            width: 2px; height: 28%;
+            background: linear-gradient(to bottom, transparent, rgba(200,151,58,0.4), transparent);
+        }
+
+        .left-ring {
+            position: absolute;
+            bottom: 16%; right: 14%;
+            width: 70px; height: 70px;
+            border: 1px solid rgba(200,151,58,0.15);
+            border-radius: 50%;
+        }
+
+        .left-ring2 {
+            position: absolute;
+            bottom: 18%; right: 16%;
+            width: 40px; height: 40px;
+            border: 1px solid rgba(200,151,58,0.1);
+            border-radius: 50%;
+        }
+
+        .eyebrow {
+            font-size: 0.7rem;
+            letter-spacing: 0.28em;
+            text-transform: uppercase;
+            color: var(--amber);
+            font-weight: 500;
+            margin-bottom: 2rem;
+            position: relative; z-index: 1;
+        }
+
+        .hero-h1 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(3.8rem, 5.5vw, 5.8rem);
+            font-weight: 300;
+            color: #fff;
+            line-height: 1.06;
+            margin-bottom: 2.2rem;
+            position: relative; z-index: 1;
+        }
+
+        .hero-h1 em {
+            font-style: italic;
+            color: var(--amber-lt);
+            display: block;
+        }
+
+        .hero-p {
+            font-size: 1rem;
+            line-height: 1.85;
+            color: rgba(255,255,255,0.5);
+            max-width: 340px;
+            margin-bottom: 3rem;
+            font-weight: 300;
+            position: relative; z-index: 1;
+        }
+
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1.1rem;
+            border: 1px solid rgba(200,151,58,0.28);
+            border-radius: 100px;
+            font-size: 0.78rem;
+            color: var(--amber-lt);
+            background: rgba(255,255,255,0.04);
+            position: relative; z-index: 1;
+            width: fit-content;
+            letter-spacing: 0.06em;
+        }
+
+        .chip-dot {
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            background: var(--amber);
+            animation: blink 2s ease-in-out infinite;
+        }
+
+        @keyframes blink {
+            0%,100% { opacity: 1; }
+            50%      { opacity: 0.2; }
+        }
+
+        /* Stats row */
+        .stats {
+            display: flex;
+            gap: 2.5rem;
+            margin-top: 3.5rem;
+            position: relative; z-index: 1;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255,255,255,0.07);
+        }
+
+        .stat-val {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2.2rem;
+            font-weight: 300;
+            color: var(--amber-lt);
+            line-height: 1;
+        }
+
+        .stat-lbl {
+            font-size: 0.68rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.35);
+            margin-top: 0.3rem;
+        }
+
+        /* ── RIGHT PANEL ── */
+        .panel-right {
+            background: var(--ivory);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem 4rem;
+            position: relative;
+        }
+
+        .panel-right::before {
+            content: '';
+            position: absolute; inset: 0;
+            background-image:
+                linear-gradient(rgba(124,29,46,0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(124,29,46,0.02) 1px, transparent 1px);
+            background-size: 44px 44px;
+            pointer-events: none;
+        }
+
+        /* ── FORM CARD ── */
+        .form-card {
+            background: #fff;
+            border-radius: 20px;
+            padding: 3rem 3.2rem 2.5rem;
+            width: 100%;
+            max-width: 640px;
+            box-shadow:
+                0 2px 6px rgba(124,29,46,0.05),
+                0 12px 40px rgba(124,29,46,0.1),
+                0 40px 80px rgba(124,29,46,0.06);
+            border: 1px solid rgba(124,29,46,0.07);
+            position: relative; z-index: 1;
+            animation: rise 0.7s cubic-bezier(0.16,1,0.3,1) both;
+        }
+
+        @keyframes rise {
+            from { opacity: 0; transform: translateY(24px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Top accent */
+        .form-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 10%; right: 10%;
+            height: 2px;
+            background: linear-gradient(to right, transparent, var(--amber), transparent);
+            border-radius: 100px;
+        }
+
+        .card-head {
+            margin-bottom: 0.5rem;
+        }
+
+        .card-head h2 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2.1rem;
+            font-weight: 600;
+            color: var(--crimson-dk);
+            margin-bottom: 0.3rem;
+            line-height: 1.15;
+        }
+
+        .card-head p {
+            font-size: 0.88rem;
+            color: var(--muted);
+            font-weight: 300;
+        }
+
+        .card-divider {
+            height: 1px;
+            background: linear-gradient(to right, var(--ivory-dk), transparent);
+            margin: 1.4rem 0 1.8rem;
+        }
+
+        /* ── FIELDS GRID ── */
+        .fields {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.2rem 1.5rem;
+        }
+
+        .fields .full { grid-column: 1 / -1; }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .field label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        .field input {
+            padding: 0.75rem 1rem;
+            border: 1.5px solid var(--ivory-dk);
+            border-radius: 10px;
+            font-family: 'Jost', sans-serif;
+            font-size: 0.95rem;
+            color: var(--charcoal);
+            background: var(--ivory);
+            outline: none;
+            width: 100%;
+            transition: border-color 0.16s, background 0.16s, box-shadow 0.16s;
+        }
+
+        .field input:focus {
+            border-color: var(--crimson-lt);
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(124,29,46,0.07);
+        }
+
+        .field input::placeholder { color: #c0b0a6; font-size: 0.88rem; }
+
+        /* ── PREDICT BUTTON ── */
+        .btn-predict {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+            width: 100%;
+            margin-top: 1.8rem;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--crimson-dk) 0%, var(--crimson-lt) 100%);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-family: 'Jost', sans-serif;
+            font-size: 0.92rem;
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            cursor: pointer;
+            box-shadow: 0 6px 22px rgba(124,29,46,0.3);
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+
+        .btn-predict:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(124,29,46,0.4);
+        }
+
+        .btn-predict:active { transform: none; box-shadow: 0 4px 14px rgba(124,29,46,0.25); }
+
+        .btn-predict svg { width: 16px; height: 16px; opacity: 0.85; }
+
+        .card-note {
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--muted);
+            margin-top: 1.1rem;
+            letter-spacing: 0.04em;
+        }
+
+        .card-note b { color: var(--amber); font-weight: 500; }
+
+        /* ── BANNER ── */
+        .banner {
+            background: var(--crimson-dk);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1.8rem;
+            flex-wrap: wrap;
+        }
+
+        .b-item {
+            font-size: 0.7rem;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.38);
+        }
+
+        .b-item strong { color: var(--amber-lt); font-weight: 500; }
+        .b-sep { color: rgba(200,151,58,0.3); font-size: 0.9rem; }
+
+        /* ── FOOTER ── */
+        footer {
+            background: var(--charcoal);
+            padding: 1.6rem 2rem;
+            text-align: center;
+        }
+
+        footer p {
+            font-size: 0.78rem;
+            color: rgba(255,255,255,0.26);
+            margin: 0;
+            letter-spacing: 0.04em;
+        }
+
+        footer strong { color: rgba(200,151,58,0.6); font-weight: 400; }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 960px) {
+            .page { grid-template-columns: 1fr; }
+            .panel-left {
+                position: relative; top: auto;
+                height: auto;
+                padding: 5rem 2rem 3rem;
+                min-height: 55vh;
+            }
+            .panel-right { padding: 2.5rem 1.5rem 3rem; }
+            .fields { grid-template-columns: 1fr; }
+            .fields .full { grid-column: 1; }
+            #mainNav { padding: 0.9rem 1.5rem; }
+            .nav-label { display: none; }
+            .stats { gap: 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAV -->
+    <nav id="mainNav">
+        <a class="nav-brand" href="/">
+            <span class="nav-dot"></span>
+            Vino<span style="font-style:italic;color:var(--amber)">Sense</span>
+        </a>
+        <span class="nav-label">ML · Wine Quality · Prediction</span>
+    </nav>
+
+    <div class="page">
+
+        <!-- LEFT PANEL -->
+        <div class="panel-left">
+            <div class="left-line"></div>
+            <div class="left-ring"></div>
+            <div class="left-ring2"></div>
+
+            <p class="eyebrow">— AI-Powered Sommelier</p>
+
+            <h1 class="hero-h1">
+                Reveal the
+                <em>Quality</em>
+                Within
+            </h1>
+
+            <p class="hero-p">
+                Enter your wine's chemical fingerprint. Our machine learning model delivers an instant, precise quality assessment based on real physicochemical data.
+            </p>
+
+            <div class="chip">
+                <span class="chip-dot"></span>
+                Model online &nbsp;·&nbsp; Ready
+            </div>
+
+            <div class="stats">
+                <div>
+                    <div class="stat-val">11</div>
+                    <div class="stat-lbl">Parameters</div>
+                </div>
+                <div>
+                    <div class="stat-val">ML</div>
+                    <div class="stat-lbl">Powered</div>
+                </div>
+                <div>
+                    <div class="stat-val">~0s</div>
+                    <div class="stat-lbl">Inference</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT PANEL -->
+        <div class="panel-right">
+            <div class="form-card">
+                <div class="card-head">
+                    <h2>Chemical Profile</h2>
+                    <p>Enter all 11 parameters to receive your quality score</p>
+                </div>
+                <div class="card-divider"></div>
+
+                <form action="/predict" method="post">
+                    <div class="fields">
+                        <div class="field">
+                            <label>Fixed Acidity</label>
+                            <input type="text" name="fixed_acidity" placeholder="e.g. 7.4" required>
+                        </div>
+                        <div class="field">
+                            <label>Volatile Acidity</label>
+                            <input type="text" name="volatile_acidity" placeholder="e.g. 0.70" required>
+                        </div>
+                        <div class="field">
+                            <label>Citric Acid</label>
+                            <input type="text" name="citric_acid" placeholder="e.g. 0.00" required>
+                        </div>
+                        <div class="field">
+                            <label>Residual Sugar</label>
+                            <input type="text" name="residual_sugar" placeholder="e.g. 1.9" required>
+                        </div>
+                        <div class="field">
+                            <label>Chlorides</label>
+                            <input type="text" name="chlorides" placeholder="e.g. 0.076" required>
+                        </div>
+                        <div class="field">
+                            <label>Free SO₂</label>
+                            <input type="text" name="free_sulfur_dioxide" placeholder="e.g. 11.0" required>
+                        </div>
+                        <div class="field">
+                            <label>Total SO₂</label>
+                            <input type="text" name="total_sulfur_dioxide" placeholder="e.g. 34.0" required>
+                        </div>
+                        <div class="field">
+                            <label>Density</label>
+                            <input type="text" name="density" placeholder="e.g. 0.9978" required>
+                        </div>
+                        <div class="field">
+                            <label>pH</label>
+                            <input type="text" name="pH" placeholder="e.g. 3.51" required>
+                        </div>
+                        <div class="field">
+                            <label>Sulphates</label>
+                            <input type="text" name="sulphates" placeholder="e.g. 0.56" required>
+                        </div>
+                        <div class="field full">
+                            <label>Alcohol (%vol)</label>
+                            <input type="text" name="alcohol" placeholder="e.g. 9.4" required>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-predict">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="5 3 19 12 5 21 5 3"/>
+                        </svg>
+                        Run Prediction
+                    </button>
+
+                    <p class="card-note">
+                        Powered by <b>scikit-learn</b> · Tracked with <b>MLflow</b>
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- BANNER -->
+    <div class="banner">
+        <span class="b-item"><strong>scikit-learn</strong> · Machine Learning</span>
+        <span class="b-sep">✦</span>
+        <span class="b-item"><strong>MLflow</strong> · Experiment Tracking</span>
+        <span class="b-sep">✦</span>
+        <span class="b-item"><strong>Flask</strong> · REST API</span>
+        <span class="b-sep">✦</span>
+        <span class="b-item">Wine Quality <strong>Dataset</strong></span>
+    </div>
+
+    <footer>
+        <p>Wine Quality Prediction &nbsp;·&nbsp; Built with <strong>Python</strong>, <strong>MLflow</strong> &amp; <strong>Flask</strong></p>
+    </footer>
+
+    <script>
+        window.addEventListener('scroll', () => {
+            document.getElementById('mainNav').style.boxShadow =
+                window.scrollY > 8 ? '0 4px 22px rgba(124,29,46,0.1)' : '';
+        });
+    </script>
+
+</body>
+</html>
