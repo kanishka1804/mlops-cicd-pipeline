@@ -1,4 +1,4 @@
-# MLOps Production Pipeline
+# MLOps-Production-Pipeline
 
 An end-to-end MLOps implementation covering the complete model lifecycle — data ingestion, experiment tracking with MLflow, containerization with Docker, and automated deployment to AWS EC2 via GitHub Actions CI/CD.
 
@@ -201,6 +201,3 @@ GitHub repo → Settings → Secrets and variables → Actions → New secret
 
 ---
 
----
-
-> ⭐ Star this repo if you found it helpful!
